@@ -1,0 +1,10 @@
+{% extends "ratingapp/layout.html" %}
+{% block content %}
+  <h2>Capture Result</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ result_form.as_p }}
+    {{ rating_form.as_p }}
+    <button type="submit">Submit Result</button>
+  </form>
+{% endblock %}

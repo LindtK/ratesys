@@ -1,0 +1,50 @@
+{% extends "ratingapp/layout.html" %}
+{% block content %}
+
+<h2>{{ lecturer.name }} {{ lecturer.surname }}</h2>
+
+<form method="get">
+    <label for="module-select">Select Module:</label>
+    <select name="module_id" id="module-select" onchange="this.form.submit()">
+        <option value="">-- Choose Module --</option>
+        {% for module in modules %}
+            <option value="{{ module.id }}" {% if module.id|stringformat:"s" == selected_module_id %}selected{% endif %}>
+                {{ module.name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if results %}
+    <h3>Results for: {{ results.0.module.name }}</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Student Surname</th>
+                <th>Semester Mark</th>
+                <th>Exam Mark</th>
+                <th>Re-exam Mark</th>
+                <th>Final Mark</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.student.name }}</td>
+                <td>{{ result.student.surname }}</td>
+                <td>{{ result.semester_mark }}</td>
+                <td>{{ result.exam_mark }}</td>
+                <td>{{ result.re_exam_mark|default:"N/A" }}</td>
+                <td>{{ result.final_mark }}</td>
+                <td>{{ result.rating.rating }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% elif selected_module_id %}
+    <p>No results found for this module.</p>
+{% endif %}
+
+{% endblock %}
