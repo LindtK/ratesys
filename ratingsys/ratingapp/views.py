@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Lecturer, Module, Student, Result, ModuleRating
-from .forms import StudentForm, ResultForm, ModuleRatingForm, StudentCSVUploadForm
+from .forms import StudentForm, ResultForm, ModuleRatingForm, StudentCSVUploadForm, StudentResultForm, CSVUploadForm
 from django.contrib.auth.decorators import login_required
 import csv
 from io import TextIOWrapper
@@ -125,30 +125,49 @@ def add_student_view(request):
 
 
 # Add results later
+@login_required
 def add_result_view(request):
     try:
         lecturer = Lecturer.objects.get(user=request.user)
     except Lecturer.DoesNotExist:
         return HttpResponse("You are not linked to any Lecturer account.", status=403)
 
-    result_form = ResultForm(request.POST or None)
-    rating_form = ModuleRatingForm(request.POST or None)
+    if request.method == "POST":
+        if 'manual_submit' in request.POST:  # Manual form submission
+            form = StudentResultForm(request.POST, lecturer=lecturer)
+            if form.is_valid():
+                form.save()
+                return redirect('add_result')
 
-    result_form.fields['module'].queryset = Module.objects.filter(lecturer=lecturer)
+        elif 'csv_submit' in request.POST:  # CSV upload submission
+            csv_form = CSVUploadForm(request.POST, request.FILES, lecturer=lecturer)
+            if csv_form.is_valid():
+                module = csv_form.cleaned_data['module']
+                file = request.FILES['csv_file'].read().decode('utf-8').splitlines()
+                reader = csv.DictReader(file)
 
-    if request.method == 'POST':
-        if result_form.is_valid() and rating_form.is_valid():
-            result = result_form.save()
-            rating = rating_form.save(commit=False)
-            rating.result = result
-            rating.save()
-            return redirect('add_result')
+                for row in reader:
+                    student, _ = Student.objects.get_or_create(
+                        student_id=row['student_id'],
+                        defaults={'name': row['name'], 'surname': row['surname']}
+                    )
+                    Result.objects.update_or_create(
+                        student=student,
+                        module=module,
+                        defaults={
+                            'semester_mark': row.get('semester_mark'),
+                            'exam_mark': row.get('exam_mark'),
+                            're_exam_mark': row.get('re_exam_mark'),
+                            'final_mark': row.get('final_mark'),
+                        }
+                    )
+                return redirect('add_result')
+
     else:
-        result_form = ResultForm()
-        result_form.fields['module'].queryset = Module.objects.filter(lecturer=lecturer)
-        rating_form = ModuleRatingForm()
+        form = StudentResultForm(lecturer=lecturer)
+        csv_form = CSVUploadForm(lecturer=lecturer)
 
     return render(request, 'ratingapp/add_result.html', {
-        'result_form': result_form,
-        'rating_form': rating_form
+        'form': form,
+        'csv_form': csv_form
     })
