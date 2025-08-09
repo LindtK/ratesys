@@ -7,5 +7,5 @@ urlpatterns = [
     path('index/', views.index, name='index'),
     path('add_student/', views.add_student_view, name='add_student'),
     path('add_result/', views.add_result_view, name='add_result'),
-    path('logout/', auth_views.LogoutView.as_view(template_name = 'ratingapp/login.html'), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(next_page = 'login'), name='logout'),
   ] 

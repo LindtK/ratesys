@@ -21,7 +21,12 @@
                     {% if user.is_authenticated %}
                     <li><a href="{% url 'add_student' %}">Add Student</a></li>
                     <li><a href="{% url 'add_result' %}">Capture Marks</a></li>
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                        </form>
+                    </li>
                     {% endif %}
                 </ul>
             </nav>
