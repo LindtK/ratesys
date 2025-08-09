@@ -15,36 +15,54 @@
     </select>
 </form>
 
-{% if results %}
-    <h3>Results for: {{ results.0.module.name }}</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Student Surname</th>
-                <th>Semester Mark</th>
-                <th>Exam Mark</th>
-                <th>Re-exam Mark</th>
-                <th>Final Mark</th>
-                <th>Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.student.name }}</td>
-                <td>{{ result.student.surname }}</td>
-                <td>{{ result.semester_mark }}</td>
-                <td>{{ result.exam_mark }}</td>
-                <td>{{ result.re_exam_mark|default:"N/A" }}</td>
-                <td>{{ result.final_mark }}</td>
-                <td>{{ result.rating.rating }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% if enrolled_students %}
+    <h3>Enrolled Students for: {{ selected_module.name }}</h3>
+    <form method="post">
+        {% csrf_token %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student Surname</th>
+                    <th>Semester Mark</th>
+                    <th>Exam Mark</th>
+                    <th>Re-exam Mark</th>
+                    <th>Final Mark</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in enrolled_students %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.surname }}</td>
+
+                    <td>
+                        <input type="number" name="semester_mark_{{ student.id }}" 
+                               value="{{ student.result.semester_mark|default_if_none:'' }}" min="0" max="100">
+                    </td>
+                    <td>
+                        <input type="number" name="exam_mark_{{ student.id }}" 
+                               value="{{ student.result.exam_mark|default_if_none:'' }}" min="0" max="100">
+                    </td>
+                    <td>
+                        <input type="number" name="re_exam_mark_{{ student.id }}" 
+                               value="{{ student.result.re_exam_mark|default_if_none:'' }}" min="0" max="100">
+                    </td>
+                    <td>
+                        {{ student.result.final_mark|default:"—" }}
+                    </td>
+                    <td>
+                        {{ student.result.rating.rating|default:"—" }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary mt-2">Save Changes</button>
+    </form>
 {% elif selected_module_id %}
-    <p>No results found for this module.</p>
+    <p>No students enrolled in this module yet.</p>
 {% endif %}
 
 {% endblock %}

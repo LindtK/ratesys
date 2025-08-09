@@ -1,9 +1,58 @@
 {% extends "ratingapp/layout.html" %}
+{% load crispy_forms_tags %}
+
 {% block content %}
-  <h2>Add Student</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add Student</button>
-  </form>
+<div class="container mt-4">
+    <h2>Add Students</h2>
+    <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Manual Student Form -->
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>Manual Add</strong>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ student_form|crispy }}
+                        <button type="submit" name="manual_submit" class="btn btn-primary">
+                            Add Student
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSV Upload Form -->
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <strong>CSV Upload</strong>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Upload a CSV file with columns: <code>student_id, name, surname</code>.
+                        All students will be enrolled into the selected module with no marks yet.
+                    </p>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ csv_form|crispy }}
+                        <button type="submit" name="csv_submit" class="btn btn-secondary">
+                            Upload CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+

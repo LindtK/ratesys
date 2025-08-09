@@ -32,10 +32,10 @@ class Student(models.Model):
 class Result(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
-    semester_mark = models.DecimalField(max_digits=5, decimal_places=2)
-    exam_mark = models.DecimalField(max_digits=5, decimal_places=2)
+    semester_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    exam_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     re_exam_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    final_mark = models.DecimalField(max_digits=5, decimal_places=2)
+    final_mark = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     
     class Meta:
         unique_together = ('student', 'module')
